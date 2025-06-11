@@ -2,13 +2,11 @@
 name = "cookiecutter-uv"
 version = "0.0.1"
 description = "A python cookiecutter application to create a new python project that uses uv to manage its dependencies."
-authors = [{ name = "Florian Maas", email = "fpgmaas@gmail.com" }]
+authors = [{ name = "Luke McGuire", email = "luke.mcguire@gmail.com" }]
 readme = "README.md"
 keywords = ['cookiecutter', 'template', 'uv']
 requires-python = ">=3.9,<4.0"
-dependencies = [
-  "cookiecutter>=2.1.1"
-]
+dependencies = ["cookiecutter>=2.1.1"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -26,9 +24,9 @@ classifiers = [
 
 
 [project.urls]
-Repository = "https://github.com/fpgmaas/cookiecutter-uv"
-Documentation = "https://fpgmaas.github.io/cookiecutter-uv/"
-Homepage = "https://fpgmaas.github.io/cookiecutter-uv/"
+Repository = "https://github.com/lukemcguire/cookiecutter-uv"
+Documentation = "https://lukemcguire.github.io/cookiecutter-uv/"
+Homepage = "https://lukemcguire.github.io/cookiecutter-uv/"
 
 [dependency-groups]
 dev = [
@@ -76,9 +74,7 @@ warn_unused_ignores = true
 show_error_codes = true
 
 [tool.deptry]
-extend_exclude = [
-  ".+/test_foo.py"
-]
+extend_exclude = [".+/test_foo.py"]
 
 [tool.deptry.per_rule_ignores]
 DEP002 = ["cookiecutter"]
@@ -109,7 +105,8 @@ select = [
     # mccabe
     "C90",
     # pycodestyle
-    "E", "W",
+    "E",
+    "W",
     # pyflakes
     "F",
     # pygrep-hooks

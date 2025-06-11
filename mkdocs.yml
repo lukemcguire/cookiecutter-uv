@@ -1,11 +1,11 @@
 site_name: cookiecutter-uv
-repo_url: https://github.com/fpgmaas/cookiecutter-uv
-site_url: https://fpgmaas.github.io/cookiecutter-uv
+repo_url: https://github.com/lukemcguire/cookiecutter-uv
+site_url: https://lukemcguire.github.io/cookiecutter-uv
 site_description: A cookiecutter template for Python projects that use uv for its dependency management
-site_author: Florian Maas
+site_author: Luke McGuire
 edit_uri: edit/main/docs/
-repo_name: fpgmaas/cookiecutter-uv
-copyright: Maintained by <a href="https://fpgmaas.com">Florian</a>.
+repo_name: lukemcguire/cookiecutter-uv
+copyright: Maintained by Luke.
 
 nav:
   - Home: index.md
@@ -54,7 +54,7 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/fpgmaas/cookiecutter-uv
+      link: https://github.com/lukemcguire/cookiecutter-uv
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/cookiecutter-uv/
 markdown_extensions:
