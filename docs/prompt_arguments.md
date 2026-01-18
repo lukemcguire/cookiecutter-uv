@@ -80,9 +80,44 @@ will be deployed to the `gh-pages` branch.
 
 `"y"` or `"n"`. Adds a [devcontainer](https://code.visualstudio.com/docs/devcontainers/containers) specification to the project along with pre-installed pre-commit hooks and VSCode python extension configuration.
 
+**python_version**
+
+Select the Python version for your project from uv-managed Python installations. Options: `["3.13", "3.12", "3.11", "3.10", "3.14"]`
+
+The template will verify that the selected version is installed via uv. If not, you'll be prompted to install it with `uv python install <version>`.
+
 **open_source_license**
 
 Choose a [license](https://choosealicense.com/). Options:
 `["1. MIT License", "2. BSD license", "3. ISC license",  "4. Apache Software License 2.0", "5. GNU General Public License v3", "6. Not open source"]`
+
+**automate_github_setup**
+
+`"y"` or `"n"`, defaults to `"n"`. Automates GitHub repository creation and initial setup after project generation. When enabled:
+
+- Creates a GitHub repository using the GitHub CLI (`gh`)
+- Initializes local git repository
+- Runs `make install` to set up the development environment
+- Makes the initial commit (handling pre-commit hooks automatically)
+- Adds the GitHub remote
+- Pushes the initial commit to GitHub
+
+**Requirements:** GitHub CLI (`gh`) must be installed and authenticated.
+
+**git_remote_protocol**
+
+`"ssh"` or `"https"`, defaults to `"ssh"`. Specifies the protocol to use for the GitHub remote URL. Only applies when `automate_github_setup` is `"y"`.
+
+- `"ssh"`: Uses SSH protocol (e.g., `git@github.com:user/repo.git`) - requires SSH key setup
+- `"https"`: Uses HTTPS protocol (e.g., `https://github.com/user/repo.git`) - uses credential helper
+
+**dry_run_github_setup**
+
+`"y"` or `"n"`, defaults to `"n"`. When enabled, shows all commands that would be executed during automated GitHub setup without actually running them. Only applies when `automate_github_setup` is `"y"`.
+
+Useful for:
+- Understanding what the automation will do before committing
+- Verifying the setup commands for your specific configuration
+- Learning the manual setup process
 
 ---

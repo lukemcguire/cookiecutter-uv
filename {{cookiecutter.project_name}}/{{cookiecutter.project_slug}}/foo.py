@@ -1,3 +1,6 @@
+"""Example module with a simple function."""
+
+
 def foo(bar: str) -> str:
     """Summary line.
 
@@ -9,7 +12,6 @@ def foo(bar: str) -> str:
     Returns:
         Description of return value
     """
-
     return bar
 
 

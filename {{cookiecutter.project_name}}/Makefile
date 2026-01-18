@@ -2,7 +2,14 @@
 install: ## Install the virtual environment and install the pre-commit hooks
 	@echo "🚀 Creating virtual environment using uv"
 	@uv sync
-	@uv run pre-commit install
+	@if git rev-parse --git-dir > /dev/null 2>&1; then \
+		echo "🚀 Installing pre-commit hooks"; \
+		uv run pre-commit install; \
+	else \
+		echo "⚠️  Not a git repository - skipping pre-commit hooks"; \
+		echo "   Run 'git init' first, then 'make install'"; \
+	fi
+	@echo "✅ Setup complete! Run 'make help' to see available commands."
 
 .PHONY: check
 check: ## Run code quality tools.
