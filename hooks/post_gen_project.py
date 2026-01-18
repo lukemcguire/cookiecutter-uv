@@ -148,6 +148,112 @@ def check_gh_auth() -> bool:
         return False
 
 
+def check_git_config() -> tuple[bool, str]:
+    """Check if git user.name and user.email are configured.
+
+    Returns:
+        Tuple of (is_configured, error_message)
+    """
+    try:
+        name_result = subprocess.run(
+            ["git", "config", "user.name"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        email_result = subprocess.run(
+            ["git", "config", "user.email"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        missing = []
+        if name_result.returncode != 0 or not name_result.stdout.strip():
+            missing.append("user.name")
+        if email_result.returncode != 0 or not email_result.stdout.strip():
+            missing.append("user.email")
+
+        if missing:
+            config_missing = " and ".join(missing)
+            error_msg = f"Git {config_missing} not configured"
+            return False, error_msg
+
+        return True, ""
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False, "Unable to check git configuration"
+
+
+def check_git_connectivity(protocol: str) -> tuple[bool, str]:
+    """Check if git can connect to GitHub with the specified protocol.
+
+    Args:
+        protocol: Either 'ssh' or 'https'
+
+    Returns:
+        Tuple of (can_connect, error_message)
+    """
+    try:
+        if protocol == "ssh":
+            # Test SSH connection to GitHub
+            result = subprocess.run(
+                ["ssh", "-T", "git@github.com"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+            # SSH to GitHub returns 1 even on successful auth with message
+            # "Hi username! You've successfully authenticated..."
+            if "successfully authenticated" in result.stderr.lower():
+                return True, ""
+            return False, "SSH connection to GitHub failed. Ensure SSH keys are configured."
+        else:  # https
+            # For HTTPS, check if credential helper is configured
+            result = subprocess.run(
+                ["git", "config", "--get", "credential.helper"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return True, ""
+            return False, "Git credential helper not configured for HTTPS. You may be prompted for credentials."
+    except subprocess.TimeoutExpired:
+        return False, f"{protocol.upper()} connection to GitHub timed out"
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False, f"Unable to test {protocol.upper()} connectivity"
+
+
+def validate_repository_name(name: str) -> tuple[bool, str]:
+    """Validate repository name meets GitHub requirements.
+
+    Args:
+        name: Repository name to validate
+
+    Returns:
+        Tuple of (is_valid, error_message)
+    """
+    import re
+
+    if not name:
+        return False, "Repository name cannot be empty"
+
+    if len(name) > 100:
+        return False, "Repository name exceeds 100 characters"
+
+    # GitHub allows alphanumeric, hyphens, underscores, and periods
+    # Must not start with a period
+    if name.startswith("."):
+        return False, "Repository name cannot start with a period"
+
+    # Check for invalid characters
+    if not re.match(r"^[a-zA-Z0-9._-]+$", name):
+        return False, "Repository name contains invalid characters (only alphanumeric, -, _, . allowed)"
+
+    return True, ""
+
+
 def setup_github_repository(*, dry_run: bool = False) -> bool:
     """Automate GitHub repository creation and initial setup.
 
@@ -170,6 +276,21 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
 
     # Check prerequisites (skip in dry-run mode)
     if not dry_run:
+        # Validate repository name
+        is_valid, error_msg = validate_repository_name(project_name)
+        if not is_valid:
+            print(f"❌ Invalid repository name: {error_msg}")
+            print(f"   Project name: '{project_name}'")
+            print("   Please use a valid name (alphanumeric, -, _, . only)")
+            return False
+
+        # Check if git repo already exists
+        if Path(PROJECT_DIRECTORY, ".git").exists():
+            print("❌ Git repository already initialized in this directory")
+            print("   This may conflict with the automation")
+            print("   Please run the setup commands manually from the README")
+            return False
+
         if not check_command_exists("gh"):
             print("❌ GitHub CLI (gh) is not installed")
             print("   Install from: https://cli.github.com/")
@@ -186,8 +307,35 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
             print("   Run: gh auth login")
             print("   Then run the setup commands manually from the README")
             return False
+
+        # Check git configuration
+        config_ok, config_error = check_git_config()
+        if not config_ok:
+            print(f"❌ {config_error}")
+            print("   Configure with:")
+            print('   git config --global user.name "Your Name"')
+            print('   git config --global user.email "your.email@example.com"')
+            return False
+
+        # Check git connectivity for chosen protocol
+        can_connect, connect_error = check_git_connectivity(protocol)
+        if not can_connect:
+            print(f"⚠️  {connect_error}")
+            if protocol == "ssh":
+                print("   Setup SSH keys: https://docs.github.com/en/authentication/connecting-to-github-with-ssh")
+            else:
+                print("   You may be prompted for credentials during push")
+            # Don't fail for HTTPS credential helper - just warn
+            if protocol == "ssh":
+                return False
     else:
-        print("ℹ️  Prerequisite checks (gh, git, auth) would be performed\n")
+        print("ℹ️  Prerequisite checks would be performed:")
+        print("    - Repository name validation")
+        print("    - Existing .git directory check")
+        print("    - gh, git installation")
+        print("    - GitHub authentication")
+        print("    - Git user configuration")
+        print(f"    - {protocol.upper()} connectivity to GitHub\n")
 
     try:
         # Initialize git repository
