@@ -1,7 +1,16 @@
+"""Pre-generation hook for cookiecutter-uv template.
+
+This module runs before project generation to validate user inputs including
+project name, project slug, and Python version availability.
+
+The subprocess module is used intentionally for controlled execution to check
+Python version availability via uv.
+"""  # noqa: INP001  # Cookiecutter hook script, not a package module
+
 from __future__ import annotations
 
 import re
-import subprocess
+import subprocess  # noqa: S404  # Controlled execution in cookiecutter hook context
 import sys
 
 PROJECT_NAME_REGEX = r"^[-a-zA-Z][-a-zA-Z0-9]+$"
@@ -25,8 +34,8 @@ if not re.match(PROJECT_SLUG_REGEX, project_slug):
 # Validate Python version is available via uv
 python_version = "{{cookiecutter.python_version}}"
 try:
-    result = subprocess.run(
-        ["uv", "python", "list"],
+    result = subprocess.run(  # Controlled uv command invocation
+        ["uv", "python", "list"],  # noqa: S607  # uv is a standard Python package manager
         capture_output=True,
         text=True,
         check=True,

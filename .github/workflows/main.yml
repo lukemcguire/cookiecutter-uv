@@ -15,14 +15,14 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/prek
+          key: prek-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Set up the environment
         uses: ./.github/actions/setup-python-env
 
-      - name: Run pre-commit
-        run: uv run pre-commit run -a --show-diff-on-failure
+      - name: Run prek
+        run: uv run prek run -a --show-diff-on-failure
 
       - name: Inspect dependencies
         run: uv run deptry .

@@ -6,7 +6,7 @@ available commands that are available can be obtained by running
 available:
 
 ```
-install              Install the uv environment and install the pre-commit hooks
+install              Install the uv environment and install the prek hooks
 check                Lint and check code by running ruff, mypy and deptry.
 test                 Test the code with pytest
 build                Build wheel file using uv

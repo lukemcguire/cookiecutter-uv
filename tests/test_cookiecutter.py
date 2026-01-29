@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 import shlex
-import subprocess
+import subprocess  # noqa: S404  # subprocess is safe in test utilities with controlled input
 
 from tests.utils import file_contains_text, is_valid_yaml, run_within_dir
 
@@ -29,8 +29,8 @@ def test_using_pytest(cookies, tmp_path):
 
         # Install the uv environment and run the tests.
         with run_within_dir(str(result.project_path)):
-            assert subprocess.check_call(shlex.split("uv sync")) == 0
-            assert subprocess.check_call(shlex.split("uv run make test")) == 0
+            assert subprocess.check_call(shlex.split("uv sync")) == 0  # noqa: S603  # controlled test command
+            assert subprocess.check_call(shlex.split("uv run make test")) == 0  # noqa: S603  # controlled test command
 
 
 def test_src_layout_using_pytest(cookies, tmp_path):
@@ -46,8 +46,8 @@ def test_src_layout_using_pytest(cookies, tmp_path):
 
         # Install the uv environment and run the tests.
         with run_within_dir(str(result.project_path)):
-            assert subprocess.check_call(shlex.split("uv sync")) == 0
-            assert subprocess.check_call(shlex.split("uv run make test")) == 0
+            assert subprocess.check_call(shlex.split("uv sync")) == 0  # noqa: S603  # controlled test command
+            assert subprocess.check_call(shlex.split("uv run make test")) == 0  # noqa: S603  # controlled test command
 
 
 def test_devcontainer(cookies, tmp_path):
@@ -79,7 +79,7 @@ def test_cicd_contains_pypi_secrets(cookies, tmp_path):
 
 def test_dont_publish(cookies, tmp_path):
     with run_within_dir(tmp_path):
-        result = cookies.bake(extra_context={"publish_to_pypi": "n"})
+        result = cookies.bake(extra_context={"publish_to_pypi": "n", "mkdocs": "y"})
         assert result.exit_code == 0
         assert is_valid_yaml(result.project_path / ".github" / "workflows" / "on-release-main.yml")
         assert not file_contains_text(
@@ -100,7 +100,7 @@ def test_mkdocs(cookies, tmp_path):
 
 def test_not_mkdocs(cookies, tmp_path):
     with run_within_dir(tmp_path):
-        result = cookies.bake(extra_context={"mkdocs": "n"})
+        result = cookies.bake(extra_context={"mkdocs": "n", "publish_to_pypi": "y"})
         assert result.exit_code == 0
         assert is_valid_yaml(result.project_path / ".github" / "workflows" / "main.yml")
         assert is_valid_yaml(result.project_path / ".github" / "workflows" / "on-release-main.yml")
@@ -111,12 +111,12 @@ def test_not_mkdocs(cookies, tmp_path):
         assert not pathlib.Path(f"{result.project_path}/docs").is_dir()
 
 
-def test_tox(cookies, tmp_path):
+def test_no_tox(cookies, tmp_path):
+    """Test that tox.ini is removed (not used in this fork)"""
     with run_within_dir(tmp_path):
         result = cookies.bake()
         assert result.exit_code == 0
-        assert pathlib.Path(f"{result.project_path}/tox.ini").is_file()
-        assert file_contains_text(f"{result.project_path}/tox.ini", "[tox]")
+        assert not pathlib.Path(f"{result.project_path}/tox.ini").is_file()
 
 
 def test_dockerfile(cookies, tmp_path):

@@ -45,7 +45,7 @@ jobs:
             This PR updates:
             - Python package versions in `pyproject.toml` files
             - uv version in GitHub Actions
-            - Pre-commit hook versions
+            - Prek hook versions
 
             Please review the changes and merge if CI passes.
           branch: chore/update-dependencies

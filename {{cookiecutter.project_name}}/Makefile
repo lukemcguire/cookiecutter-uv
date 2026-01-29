@@ -1,12 +1,12 @@
 .PHONY: install
-install: ## Install the virtual environment and install the pre-commit hooks
+install: ## Install the virtual environment and install the prek hooks
 	@echo "🚀 Creating virtual environment using uv"
 	@uv sync
 	@if git rev-parse --git-dir > /dev/null 2>&1; then \
-		echo "🚀 Installing pre-commit hooks"; \
-		uv run pre-commit install; \
+		echo "🚀 Installing prek hooks"; \
+		uv run prek install; \
 	else \
-		echo "⚠️  Not a git repository - skipping pre-commit hooks"; \
+		echo "⚠️  Not a git repository - skipping prek hooks"; \
 		echo "   Run 'git init' first, then 'make install'"; \
 	fi
 	@echo "✅ Setup complete! Run 'make help' to see available commands."
@@ -15,8 +15,8 @@ install: ## Install the virtual environment and install the pre-commit hooks
 check: ## Run code quality tools.
 	@echo "🚀 Checking lock file consistency with 'pyproject.toml'"
 	@uv lock --locked
-	@echo "🚀 Linting code: Running pre-commit"
-	@uv run pre-commit run -a
+	@echo "🚀 Linting code: Running prek"
+	@uv run prek run -a
 	@echo "🚀 Static type checking: Running {{ cookiecutter.type_checker }}"
 	@uv run {% if cookiecutter.type_checker == "mypy" %}mypy{% else %}ty check{% endif %}
 {%- if cookiecutter.deptry == 'y' %}

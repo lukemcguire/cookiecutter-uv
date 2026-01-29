@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import logging
 import re
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cookiecutter_uv.cicd.config import (
-    PRECOMMIT_HOOKS,
+    PREK_HOOKS,
     PYPI_PACKAGES,
     UV_REPO,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 from cookiecutter_uv.cicd.fetchers import get_github_release, get_github_tag, get_pypi_version
 
 logger = logging.getLogger(__name__)
@@ -31,7 +34,11 @@ class PyprojectTomlUpdater:
         return f'\\g<1>>={version}"'
 
     def _update_file(self, filepath: Path, package: str, version: str) -> bool:
-        """Update a single package in a pyproject.toml file. Returns True if updated."""
+        """Update a single package in a pyproject.toml file.
+
+        Returns:
+            True if the file was updated, False otherwise.
+        """
         content = filepath.read_text()
         pattern = self._build_pattern(package)
         replacement = self._build_replacement(version)
@@ -43,12 +50,20 @@ class PyprojectTomlUpdater:
         return False
 
     def _matches(self, filepath: Path, package: str) -> bool:
-        """Check if file contains the package pattern."""
+        """Check if file contains the package pattern.
+
+        Returns:
+            True if the package pattern is found in the file, False otherwise.
+        """
         content = filepath.read_text()
         return bool(re.search(self._build_pattern(package), content))
 
-    def update(self, dry_run: bool = False) -> int:
-        """Update all pyproject.toml files. Returns count of updates."""
+    def update(self, *, dry_run: bool = False) -> int:
+        """Update all pyproject.toml files.
+
+        Returns:
+            The number of updates applied or that would be applied in dry-run mode.
+        """
         update_count = 0
 
         for package in PYPI_PACKAGES:
@@ -88,7 +103,11 @@ class ActionYmlUpdater:
         return rf"\g<1>{version}\2"
 
     def _update_file(self, filepath: Path, version: str) -> bool:
-        """Update uv version in an action.yml file. Returns True if updated."""
+        """Update uv version in an action.yml file.
+
+        Returns:
+            True if the file was updated, False otherwise.
+        """
         content = filepath.read_text()
         replacement = self._build_replacement(version)
         new_content, count = re.subn(self.PATTERN, replacement, content)
@@ -99,12 +118,20 @@ class ActionYmlUpdater:
         return False
 
     def _matches(self, filepath: Path) -> bool:
-        """Check if file contains the uv version pattern."""
+        """Check if file contains the uv version pattern.
+
+        Returns:
+            True if the uv version pattern is found in the file, False otherwise.
+        """
         content = filepath.read_text()
         return bool(re.search(self.PATTERN, content))
 
-    def update(self, dry_run: bool = False) -> int:
-        """Update all action.yml files. Returns count of updates."""
+    def update(self, *, dry_run: bool = False) -> int:
+        """Update all action.yml files.
+
+        Returns:
+            The number of updates applied or that would be applied in dry-run mode.
+        """
         version = get_github_release(UV_REPO)
         if not version:
             logger.warning("Failed to fetch uv version")
@@ -146,7 +173,11 @@ class PreCommitConfigUpdater:
         return repo_url.split("/")[-1]
 
     def _update_hook(self, content: str, repo_url: str, version: str) -> tuple[str, bool]:
-        """Update a single hook in pre-commit config. Returns (new_content, updated)."""
+        """Update a single hook in prek config.
+
+        Returns:
+            A tuple of (new_content, updated) where updated is True if changes were made.
+        """
         pattern = self._build_pattern(repo_url)
         replacement = self._build_replacement(version)
         new_content, count = re.subn(pattern, replacement, content)
@@ -156,18 +187,26 @@ class PreCommitConfigUpdater:
         return content, False
 
     def _matches(self, content: str, repo_url: str) -> bool:
-        """Check if content contains the hook pattern."""
+        """Check if content contains the hook pattern.
+
+        Returns:
+            True if the hook pattern is found in the content, False otherwise.
+        """
         return bool(re.search(self._build_pattern(repo_url), content))
 
-    def update(self, dry_run: bool = False) -> int:
-        """Update pre-commit config. Returns count of updates."""
+    def update(self, *, dry_run: bool = False) -> int:
+        """Update prek config.
+
+        Returns:
+            The number of updates applied or that would be applied in dry-run mode.
+        """
         if not self.config_file.exists():
             return 0
 
         update_count = 0
         content = self.config_file.read_text()
 
-        for repo_url, github_repo in PRECOMMIT_HOOKS:
+        for repo_url, github_repo in PREK_HOOKS:
             version = get_github_tag(github_repo)
             if not version:
                 logger.warning("Failed to fetch version for %s", github_repo)

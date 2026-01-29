@@ -37,7 +37,7 @@ Homepage = "https://lukemcguire.github.io/cookiecutter-uv/"
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
-    "pre-commit>=4.5.1",
+    "prek>=0.2.0",
     "pytest-cookies>=0.7.0",
     "deptry>=0.24.0",
     "mypy>=1.19.1",

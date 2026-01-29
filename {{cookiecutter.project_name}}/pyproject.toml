@@ -26,7 +26,7 @@ Documentation = "https://{{cookiecutter.author_github_handle}}.github.io/{{cooki
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
-    "pre-commit>=4.5.1",
+    "prek>=0.2.0",
     {% if cookiecutter.deptry == 'y' %}"deptry>=0.24.0",{% endif %}
     {% if cookiecutter.type_checker == "mypy" -%}
         "mypy>=1.19.1",

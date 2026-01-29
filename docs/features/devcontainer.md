@@ -5,5 +5,5 @@ specification to create a reproducible development environment. The devcontainer
 is defined in the `.devcontainer` directory and pre-installs all dependencies
 from uv required to develop, test and build the project.
 
-The devcontainer also installs the pre-commit hooks and configures the VSCode python
+The devcontainer also installs the prek hooks and configures the VSCode python
 extension to use the appropriate python interpretor and pytest paths.

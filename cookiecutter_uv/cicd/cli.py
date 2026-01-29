@@ -44,6 +44,7 @@ def cli() -> None:
     help="Pre-commit config files to update (can be repeated)",
 )
 def update_dependencies(
+    *,
     dry_run: bool,
     pyproject_files: tuple[Path, ...],
     action_yml_files: tuple[Path, ...],

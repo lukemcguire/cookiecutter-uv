@@ -29,7 +29,7 @@ def is_valid_yaml(path: str | Path):
 
 @contextmanager
 def run_within_dir(path: str):
-    oldpwd = os.getcwd()
+    oldpwd = Path.cwd()
     os.chdir(path)
     try:
         yield

@@ -6,7 +6,7 @@ Code can be linted and quality-checked with the command
 make check
 ```
 
-Note that this requires the pre-commit hooks to be installed.
+Note that this requires the prek hooks to be installed.
 
 This command will run the following tools:
 

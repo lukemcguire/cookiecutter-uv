@@ -1,34 +1,68 @@
 #!/usr/bin/env python
+"""Post-generation hook for cookiecutter-uv template.
+
+This module runs after project generation to customize the generated project
+based on user selections. It performs file cleanup, Python version updates,
+and optionally automates GitHub repository setup.
+
+The subprocess module is used intentionally for controlled command execution
+with user-provided cookiecutter variables that have been validated.
+"""  # Cookiecutter hook script, not a package module
+
 from __future__ import annotations
 
-import os
 import re
 import shutil
-import subprocess
-import sys
+import subprocess  # noqa: S404  # Controlled execution in cookiecutter hook context
 from pathlib import Path
 
-PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
+PROJECT_DIRECTORY = Path.cwd()
 
 
 def remove_file(filepath: str) -> None:
-    Path(os.path.join(PROJECT_DIRECTORY, filepath)).unlink()
+    """Remove a file from the generated project.
+
+    Args:
+        filepath: Relative path to the file to remove
+    """
+    (PROJECT_DIRECTORY / filepath).unlink()
 
 
 def remove_dir(filepath: str) -> None:
-    shutil.rmtree(os.path.join(PROJECT_DIRECTORY, filepath))
+    """Remove a directory and its contents from the generated project.
+
+    Args:
+        filepath: Relative path to the directory to remove
+    """
+    shutil.rmtree(PROJECT_DIRECTORY / filepath)
 
 
 def move_file(filepath: str, target: str) -> None:
-    Path(os.path.join(PROJECT_DIRECTORY, filepath)).rename(os.path.join(PROJECT_DIRECTORY, target))
+    """Move or rename a file in the generated project.
+
+    Args:
+        filepath: Relative path to the source file
+        target: Relative path to the target location
+    """
+    (PROJECT_DIRECTORY / filepath).rename(PROJECT_DIRECTORY / target)
 
 
 def move_dir(src: str, target: str) -> None:
-    shutil.move(os.path.join(PROJECT_DIRECTORY, src), os.path.join(PROJECT_DIRECTORY, target))
+    """Move a directory in the generated project.
+
+    Args:
+        src: Relative path to the source directory
+        target: Relative path to the target location
+    """
+    shutil.move(str(PROJECT_DIRECTORY / src), str(PROJECT_DIRECTORY / target))
 
 
 def get_python_version() -> str:
-    """Get selected Python version from cookiecutter config."""
+    """Get selected Python version from cookiecutter config.
+
+    Returns:
+        Python version string selected during project generation
+    """
     return "{{cookiecutter.python_version}}"
 
 
@@ -82,7 +116,14 @@ def remove_tox_ini() -> None:
 
 
 def check_command_exists(command: str) -> bool:
-    """Check if a command exists in the system PATH."""
+    """Check if a command exists in the system PATH.
+
+    Args:
+        command: Name of the command to check
+
+    Returns:
+        True if command exists in PATH, False otherwise
+    """
     return shutil.which(command) is not None
 
 
@@ -105,6 +146,9 @@ def run_command(
 
     Returns:
         CompletedProcess instance with command results, or None if dry_run
+
+    Raises:
+        CalledProcessError: If command fails and check=True
     """
     cmd_str = " ".join(cmd)
 
@@ -115,7 +159,7 @@ def run_command(
 
     print(f"🚀 {description}...")
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # Controlled execution in hook with validated cookiecutter variables
             cmd,
             cwd=PROJECT_DIRECTORY,
             check=check,
@@ -126,26 +170,32 @@ def run_command(
             print(f"✅ {description} completed successfully")
         if not capture_output and result.stdout:
             print(result.stdout)
-        return result
     except subprocess.CalledProcessError as e:
         print(f"❌ {description} failed with exit code {e.returncode}")
         if e.stderr:
             print(f"Error: {e.stderr}")
         raise
+    else:
+        return result
 
 
 def check_gh_auth() -> bool:
-    """Check if GitHub CLI is authenticated."""
+    """Check if GitHub CLI is authenticated.
+
+    Returns:
+        True if gh is authenticated, False otherwise
+    """
     try:
-        result = subprocess.run(
-            ["gh", "auth", "status"],
+        result = subprocess.run(  # Controlled gh CLI invocation
+            ["gh", "auth", "status"],  # noqa: S607  # gh is a standard CLI tool
             capture_output=True,
             text=True,
             check=False,
         )
-        return result.returncode == 0
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
+    else:
+        return result.returncode == 0
 
 
 def check_git_config() -> tuple[bool, str]:
@@ -155,14 +205,14 @@ def check_git_config() -> tuple[bool, str]:
         Tuple of (is_configured, error_message)
     """
     try:
-        name_result = subprocess.run(
-            ["git", "config", "user.name"],
+        name_result = subprocess.run(  # Controlled git config read
+            ["git", "config", "user.name"],  # noqa: S607  # git is a standard CLI tool
             capture_output=True,
             text=True,
             check=False,
         )
-        email_result = subprocess.run(
-            ["git", "config", "user.email"],
+        email_result = subprocess.run(  # Controlled git config read
+            ["git", "config", "user.email"],  # noqa: S607  # git is a standard CLI tool
             capture_output=True,
             text=True,
             check=False,
@@ -179,9 +229,10 @@ def check_git_config() -> tuple[bool, str]:
             error_msg = f"Git {config_missing} not configured"
             return False, error_msg
 
-        return True, ""
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False, "Unable to check git configuration"
+    else:
+        return True, ""
 
 
 def check_git_connectivity(protocol: str) -> tuple[bool, str]:
@@ -196,8 +247,8 @@ def check_git_connectivity(protocol: str) -> tuple[bool, str]:
     try:
         if protocol == "ssh":
             # Test SSH connection to GitHub
-            result = subprocess.run(
-                ["ssh", "-T", "git@github.com"],
+            result = subprocess.run(  # Controlled SSH test to GitHub
+                ["ssh", "-T", "git@github.com"],  # noqa: S607  # ssh is a standard CLI tool
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -208,21 +259,23 @@ def check_git_connectivity(protocol: str) -> tuple[bool, str]:
             if "successfully authenticated" in result.stderr.lower():
                 return True, ""
             return False, "SSH connection to GitHub failed. Ensure SSH keys are configured."
-        else:  # https
-            # For HTTPS, check if credential helper is configured
-            result = subprocess.run(
-                ["git", "config", "--get", "credential.helper"],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            if result.returncode == 0 and result.stdout.strip():
-                return True, ""
-            return False, "Git credential helper not configured for HTTPS. You may be prompted for credentials."
+
+        # https - check if credential helper is configured
+        result = subprocess.run(  # Controlled git config read
+            ["git", "config", "--get", "credential.helper"],  # noqa: S607  # git is a standard CLI tool
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return True, ""
+
     except subprocess.TimeoutExpired:
         return False, f"{protocol.upper()} connection to GitHub timed out"
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False, f"Unable to test {protocol.upper()} connectivity"
+    else:
+        return False, "Git credential helper not configured for HTTPS. You may be prompted for credentials."
 
 
 def validate_repository_name(name: str) -> tuple[bool, str]:
@@ -254,7 +307,7 @@ def validate_repository_name(name: str) -> tuple[bool, str]:
     return True, ""
 
 
-def setup_github_repository(*, dry_run: bool = False) -> bool:
+def setup_github_repository(*, dry_run: bool = False) -> bool:  # noqa: C901  # Complexity justified for comprehensive GitHub setup
     """Automate GitHub repository creation and initial setup.
 
     Args:
@@ -329,7 +382,7 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
             if protocol == "ssh":
                 return False
     else:
-        print("ℹ️  Prerequisite checks would be performed:")
+        print("ℹ️  Prerequisite checks would be performed:")  # noqa: RUF001  # Info symbol intentional for UI
         print("    - Repository name validation")
         print("    - Existing .git directory check")
         print("    - gh, git installation")
@@ -345,7 +398,7 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
             dry_run=dry_run,
         )
 
-        # Run make install to set up environment and pre-commit
+        # Run make install to set up environment and prek
         run_command(
             ["make", "install"],
             "Setting up development environment",
@@ -366,7 +419,7 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
         ]
         result = run_command(
             gh_create_cmd,
-            f"Creating GitHub repository",
+            "Creating GitHub repository",
             check=False,
             capture_output=True,
             dry_run=dry_run,
@@ -377,11 +430,11 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
                 print(f"⚠️  Repository {author_handle}/{project_name} already exists")
                 print("   Continuing with existing repository...")
             else:
-                print(f"❌ Failed to create GitHub repository")
+                print("❌ Failed to create GitHub repository")
                 print(f"   Error: {result.stderr}")
                 print("   Please create the repository manually and run:")
-                print(f"   git remote add origin <your-repo-url>")
-                print(f"   git push -u origin main")
+                print("   git remote add origin <your-repo-url>")
+                print("   git push -u origin main")
                 return False
 
         # Stage all files
@@ -402,14 +455,14 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
             dry_run=dry_run,
         )
 
-        # Check if pre-commit modified any files
+        # Check if prek modified any files
         if dry_run:
-            print("[DRY RUN] Checking if pre-commit modified files")
+            print("[DRY RUN] Checking if prek modified files")
             print("          Would run: git status --porcelain")
             print("[DRY RUN] If files were modified, would stage and commit again")
         else:
-            status_result = subprocess.run(
-                ["git", "status", "--porcelain"],
+            status_result = subprocess.run(  # Controlled git status check
+                ["git", "status", "--porcelain"],  # noqa: S607  # git is a standard CLI tool
                 cwd=PROJECT_DIRECTORY,
                 capture_output=True,
                 text=True,
@@ -417,10 +470,10 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
             )
 
             if status_result.stdout.strip():
-                print("🔧 Pre-commit hooks modified files, committing changes...")
+                print("🔧 Prek hooks modified files, committing changes...")
                 run_command(
                     ["git", "add", "."],
-                    "Staging pre-commit modifications",
+                    "Staging prek modifications",
                 )
                 run_command(
                     ["git", "commit", "-m", "init commit"],
@@ -435,12 +488,12 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
 
         # Check if remote already exists
         if dry_run:
-            print(f"[DRY RUN] Checking if remote 'origin' exists")
-            print(f"          Would run: git remote get-url origin")
+            print("[DRY RUN] Checking if remote 'origin' exists")
+            print("          Would run: git remote get-url origin")
             print(f"[DRY RUN] If remote doesn't exist, would add: {remote_url}")
         else:
-            check_remote = subprocess.run(
-                ["git", "remote", "get-url", "origin"],
+            check_remote = subprocess.run(  # Controlled git remote check
+                ["git", "remote", "get-url", "origin"],  # noqa: S607  # git is a standard CLI tool
                 cwd=PROJECT_DIRECTORY,
                 capture_output=True,
                 check=False,
@@ -469,16 +522,17 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:
             print("=" * 60)
             print(f"\n📂 Repository: https://github.com/{author_handle}/{project_name}")
             print("🎉 Your project is ready to go!\n")
-        return True
 
     except subprocess.CalledProcessError as e:
         print(f"\n❌ Automated setup failed: {e}")
         print("\nPlease complete the setup manually using the commands in README.md")
         return False
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001  # Broad handler for any setup failure - user-facing error message
         print(f"\n❌ Unexpected error during setup: {e}")
         print("\nPlease complete the setup manually using the commands in README.md")
         return False
+    else:
+        return True
 
 
 if __name__ == "__main__":
@@ -556,7 +610,7 @@ if __name__ == "__main__":
     if "{{cookiecutter.layout}}" == "src":
         if Path("src").is_dir():
             remove_dir("src")
-        move_dir("{{cookiecutter.project_slug}}", os.path.join("src", "{{cookiecutter.project_slug}}"))
+        move_dir("{{cookiecutter.project_slug}}", str(Path("src") / "{{cookiecutter.project_slug}}"))
 
     # Run automated GitHub setup if requested
     if "{{cookiecutter.automate_github_setup}}" == "y":

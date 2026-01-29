@@ -78,7 +78,7 @@ will be deployed to the `gh-pages` branch.
 
 **devcontainer**
 
-`"y"` or `"n"`. Adds a [devcontainer](https://code.visualstudio.com/docs/devcontainers/containers) specification to the project along with pre-installed pre-commit hooks and VSCode python extension configuration.
+`"y"` or `"n"`. Adds a [devcontainer](https://code.visualstudio.com/docs/devcontainers/containers) specification to the project along with pre-installed prek hooks and VSCode python extension configuration.
 
 **python_version**
 
@@ -98,7 +98,7 @@ Choose a [license](https://choosealicense.com/). Options:
 - Creates a GitHub repository using the GitHub CLI (`gh`)
 - Initializes local git repository
 - Runs `make install` to set up the development environment
-- Makes the initial commit (handling pre-commit hooks automatically)
+- Makes the initial commit (handling prek hooks automatically)
 - Adds the GitHub remote
 - Pushes the initial commit to GitHub
 

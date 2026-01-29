@@ -16,7 +16,11 @@ DATA_DIR = Path(__file__).parent / "data" / "cicd"
 
 @pytest.fixture
 def temp_pyproject(tmp_path: Path) -> Path:
-    """Copy sample pyproject.toml to temp directory."""
+    """Copy sample pyproject.toml to temp directory.
+
+    Returns:
+        Path: Path to the temporary pyproject.toml file.
+    """
     dest = tmp_path / "pyproject.toml"
     shutil.copy(DATA_DIR / "sample_pyproject.toml", dest)
     return dest
@@ -24,7 +28,11 @@ def temp_pyproject(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def temp_action_yml(tmp_path: Path) -> Path:
-    """Copy sample action.yml to temp directory."""
+    """Copy sample action.yml to temp directory.
+
+    Returns:
+        Path: Path to the temporary action.yml file.
+    """
     dest = tmp_path / "action.yml"
     shutil.copy(DATA_DIR / "sample_action.yml", dest)
     return dest
@@ -32,7 +40,11 @@ def temp_action_yml(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def temp_precommit(tmp_path: Path) -> Path:
-    """Copy sample pre-commit config to temp directory."""
+    """Copy sample prek config to temp directory.
+
+    Returns:
+        Path: Path to the temporary .pre-commit-config.yaml file.
+    """
     dest = tmp_path / ".pre-commit-config.yaml"
     shutil.copy(DATA_DIR / "sample_precommit.yaml", dest)
     return dest
@@ -115,7 +127,7 @@ class TestPreCommitConfigUpdater:
             ("https://github.com/pre-commit/pre-commit-hooks", GitHubRepo("pre-commit", "pre-commit-hooks")),
         ]
         with (
-            patch("cookiecutter_uv.cicd.updaters.PRECOMMIT_HOOKS", hooks),
+            patch("cookiecutter_uv.cicd.updaters.PREK_HOOKS", hooks),
             patch("cookiecutter_uv.cicd.updaters.get_github_tag", return_value="5.0.0"),
         ):
             count = PreCommitConfigUpdater(temp_precommit).update()

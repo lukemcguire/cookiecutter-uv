@@ -52,7 +52,7 @@ Initially, the CI/CD pipeline will fail for two reasons:
 - The project does not yet contain a `uv.lock` file
 - There are a few formatting issues in the project
 
-To fix that, we first install the environment and the pre-commit hooks with:
+To fix that, we first install the environment and the prek hooks with:
 
 ```bash
 make install
@@ -60,12 +60,12 @@ make install
 
 This will generate the `uv.lock` file
 
-### Step 6: Run the pre-commit hooks
+### Step 6: Run the prek hooks
 
-Now, to resolve the formatting issues, let's run the pre-commit hooks:
+Now, to resolve the formatting issues, let's run the prek hooks:
 
 ```bash
-uv run pre-commit run -a
+uv run prek run -a
 ```
 
 ### 7. Commit the changes
