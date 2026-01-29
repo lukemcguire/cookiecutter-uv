@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Pre-generation hook for cookiecutter-uv template.
 
 This module runs before project generation to validate user inputs including
@@ -5,7 +6,7 @@ project name, project slug, and Python version availability.
 
 The subprocess module is used intentionally for controlled execution to check
 Python version availability via uv.
-"""  # noqa: INP001  # Cookiecutter hook script, not a package module
+"""  # Cookiecutter hook script, not a package module
 
 from __future__ import annotations
 
