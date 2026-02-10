@@ -398,9 +398,9 @@ def setup_github_repository(*, dry_run: bool = False) -> bool:  # noqa: C901  # 
             dry_run=dry_run,
         )
 
-        # Run make install to set up environment and prek
+        # Run just install to set up environment and prek
         run_command(
-            ["make", "install"],
+            ["just", "install"],
             "Setting up development environment",
             dry_run=dry_run,
         )

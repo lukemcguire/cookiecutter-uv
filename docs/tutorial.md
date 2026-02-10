@@ -21,7 +21,7 @@ uvx cookiecutter https://github.com/lukemcguire/cookiecutter-uv.git
 ```
 
 For an explanation of the prompt arguments, see
-[Prompt Arguments](../prompt_arguments).
+[Prompt Arguments](prompt_arguments.md).
 
 ## Step 3: Set up your Github repository
 
@@ -55,7 +55,7 @@ Initially, the CI/CD pipeline will fail for two reasons:
 To fix that, we first install the environment and the prek hooks with:
 
 ```bash
-make install
+just install
 ```
 
 This will generate the `uv.lock` file

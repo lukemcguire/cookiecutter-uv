@@ -22,7 +22,7 @@ def test_full_structure(cookies, tmp_path):
         "CONTRIBUTING.md",
         "Dockerfile",  # Enabled with dockerfile='y'
         "LICENSE",
-        "Makefile",
+        "justfile",
         "README.md",
         "codecov.yaml",
         "docs",

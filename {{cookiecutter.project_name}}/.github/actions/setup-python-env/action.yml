@@ -25,6 +25,9 @@ runs:
         enable-cache: 'true'
         cache-suffix: {% raw %}${{ matrix.python-version }}{% endraw %}
 
+    - name: Install just
+      uses: extractions/setup-just@v2
+
     - name: Install Python dependencies
       run: uv sync --frozen
       shell: bash

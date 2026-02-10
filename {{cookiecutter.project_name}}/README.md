@@ -17,7 +17,7 @@ First, create a repository on GitHub with the same name as this project, then:
 
 ```bash
 git init -b main
-make install
+just install
 git add .
 git commit -m "init commit"
 # If prek modifies files, add them and commit again:
@@ -26,7 +26,7 @@ git remote add origin git@github.com:{{cookiecutter.author_github_handle}}/{{coo
 git push -u origin main
 ```
 
-The `make install` command will:
+The `just install` command will:
 - Create a virtual environment using uv
 - Install all dependencies and generate `uv.lock`
 - Install prek hooks
