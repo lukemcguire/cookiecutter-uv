@@ -1,6 +1,6 @@
-<p align="center">
+<p align="center" style="margin-bottom: 2rem;">
   <img width="600" src="static/cookiecutter.svg">
-</p style = "margin-bottom: 2rem;">
+</p>
 <style>
   .md-typeset h1,
   .md-content__button {
